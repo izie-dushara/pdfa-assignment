@@ -487,7 +487,6 @@ df <- df %>%
   mutate(amount_invested_monthly = ifelse(is.na(amount_invested_monthly), mean(amount_invested_monthly, na.rm = TRUE), amount_invested_monthly))
   
 summary(df) 
-View(df)
 # write.csv(df, "na_handles.csv")
 #==========================================================#
 
@@ -505,7 +504,7 @@ lower_winsor <- quantile(df$age, 0.09)
 df <- df %>%
   group_by(customer_id) %>% 
   mutate(age = ifelse(between(age, lower_winsor, upper_winsor), age, NA)) 
-  
+
 # Fill some data, suspected to be input error
 df <- df %>% 
   group_by(customer_id) %>% 
@@ -518,34 +517,163 @@ df <- df %>%
 
 boxplot(df$age)
 summary(df$age)
-View(df)
 
-### annual_income ###
-summary(df$annual_income)
-boxplot(df$annual_income)
+### total_emi_per_month ###
+summary(df$total_emi_per_month)
+boxplot(df$total_emi_per_month)
 
 # The bound before the outlier begin
-upper_winsor <- quantile(df$annual_income, 0.95)
+upper_winsor <- quantile(df$total_emi_per_month, 0.91)
 
-# Turn outlier into NAs
+# Turn outlier and input error into NAs
 df <- df %>%
   group_by(customer_id) %>% 
-  mutate(annual_income = ifelse(between(annual_income, min(annual_income), upper_winsor), annual_income, NA)) 
+  mutate(total_emi_per_month = ifelse(total_emi_per_month >= upper_winsor, NA, total_emi_per_month)) 
+
+summary(df$total_emi_per_month)
 
 # Fill some data, suspected to be input error
 df <- df %>% 
   group_by(customer_id) %>% 
-  fill(annual_income, .direction = "updown")
+  fill(total_emi_per_month, .direction = "updown")
+
+summary(df$total_emi_per_month)
+
+# Remove the outlier
+df <- df %>% 
+  group_by(customer_id) %>%  
+  mutate(total_emi_per_month = ifelse(is.na(total_emi_per_month), upper_winsor, total_emi_per_month))
+
+boxplot(df$total_emi_per_month)
+summary(df$total_emi_per_month)
+
+### outstanding_debt ###
+summary(df$outstanding_debt)
+boxplot(df$outstanding_debt)
+
+# The bound before the outlier begin
+upper_winsor <- quantile(df$outstanding_debt, 0.935)
+
+# Turn outlier and input error into NAs
+df <- df %>%
+  group_by(customer_id) %>% 
+  mutate(outstanding_debt = ifelse(outstanding_debt >= upper_winsor, NA, outstanding_debt)) 
+
+# Fill some data, suspected to be input error
+df <- df %>% 
+  group_by(customer_id) %>% 
+  fill(outstanding_debt, .direction = "updown")
+
+summary(df$outstanding_debt)
+
+# Remove the outlier
+df <- df %>% 
+  group_by(customer_id) %>%  
+  mutate(outstanding_debt = ifelse(is.na(outstanding_debt), upper_winsor, outstanding_debt))
+
+boxplot(df$outstanding_debt)
+summary(df$outstanding_debt)
+
+### num_of_loan ###
+summary(df$num_of_loan)
+boxplot(df$num_of_loan)
+
+# The bound before the outlier begin
+upper_winsor <- quantile(df$num_of_loan, 0.95)
+lower_winsor <- quantile(df$num_of_loan, 0.05)
+
+
+# Turn outlier and input error into NAs
+df <- df %>%
+  group_by(customer_id) %>% 
+  mutate(num_of_loan = ifelse(between(num_of_loan, lower_winsor, upper_winsor), num_of_loan, NA))
+
+summary(df$num_of_loan)
+
+# Fill some data, suspected to be input error
+df <- df %>% 
+  group_by(customer_id) %>% 
+  fill(num_of_loan, .direction = "updown")
+
+summary(df$num_of_loan)
 
 # Remove the outlier
 df <- df %>% 
   group_by(customer_id) %>% 
-  mutate(annual_income = ifelse(is.na(annual_income), upper_winsor, annual_income))
+  mutate(num_of_loan = ifelse(is.na(num_of_loan), upper_winsor, num_of_loan))
 
-boxplot(df$annual_income)
-summary(df$annual_income)
-View(dfT)
+boxplot(df$num_of_loan)
+summary(df$num_of_loan)
 
+### interest_rate ###
+summary(df$interest_rate)
+boxplot(df$interest_rate)
+# The bound before the outlier begin
+upper_winsor <- quantile(df$interest_rate, 0.95)
+
+
+# Turn outlier and input error into NAs
+df <- df %>%
+  group_by(customer_id) %>% 
+  mutate(interest_rate = ifelse(interest_rate >= upper_winsor, NA, interest_rate))
+
+# Fill some data, suspected to be input error
+df <- df %>% 
+  group_by(customer_id) %>% 
+  fill(interest_rate, .direction = "updown")
+
+summary(df$interest_rate)
+boxplot(df$interest_rate)
+
+# Remove the outlier
+df <- df %>% 
+  group_by(customer_id) %>% 
+  mutate(interest_rate = ifelse(is.na(interest_rate), upper_winsor, interest_rate))
+
+boxplot(df$interest_rate)
+summary(df$interest_rate)
+
+### num_credit_card ###
+summary(df$num_credit_card)
+boxplot(df$num_credit_card)
+
+# The bound before the outlier begin
+upper_winsor <- quantile(df$num_credit_card, 0.97)
+
+# Turn outlier and input error into NAs
+df <- df %>%
+  group_by(customer_id) %>% 
+  mutate(num_credit_card = ifelse(between(num_credit_card, min(num_credit_card), upper_winsor), num_credit_card, NA))
+summary(df$num_credit_card)
+# Fill some data, suspected to be input error
+df <- df %>% 
+  group_by(customer_id) %>% 
+  fill(num_credit_card, .direction = "updown")
+
+boxplot(df$num_credit_card)
+summary(df$num_credit_card)
+
+### num_bank_accounts ###
+summary(df$num_bank_accounts)
+boxplot(df$num_bank_accounts)
+
+# The bound before the outlier begin
+upper_winsor <- quantile(df$num_bank_accounts, 0.98)
+lower_winsor <- quantile(df$num_bank_accounts, 0.05)
+
+# Turn outlier and input error into NAs
+df <- df %>%
+  group_by(customer_id) %>% 
+  mutate(num_bank_accounts = ifelse(between(num_bank_accounts, min(num_bank_accounts), upper_winsor), num_bank_accounts, NA)) %>%   
+  mutate(num_bank_accounts = ifelse(num_bank_accounts <= lower_winsor, lower_winsor, num_bank_accounts))
+summary(df$num_bank_accounts)
+# Fill some data, suspected to be input error
+df <- df %>% 
+  group_by(customer_id) %>% 
+  fill(num_bank_accounts, .direction = "updown")
+
+boxplot(df$num_bank_accounts)
+summary(df$num_bank_accounts)
 
 ### monthly_inhand_salary ###
 summary(df$monthly_inhand_salary)
@@ -559,392 +687,172 @@ df <- df %>%
   group_by(customer_id) %>% 
   mutate(monthly_inhand_salary = ifelse(monthly_inhand_salary >= upper_winsor, upper_winsor, monthly_inhand_salary))
 
-
 boxplot(df$monthly_inhand_salary)
 summary(df$monthly_inhand_salary)
 View(df)
 
-### num_bank_accounts ###
-summary(df$num_bank_accounts)
-boxplot(df$num_bank_accounts)
-
-# The bound before the outlier begin
-upper_winsor <- quantile(df$num_bank_accounts, 0.98)
-lower_winsor <- quantile(df$num_bank_accounts, 0.05)
-
-# Turn outlier into NAs
-df <- df %>%
-  group_by(customer_id) %>% 
-  mutate(num_bank_accounts = ifelse(between(num_bank_accounts, min(num_bank_accounts), upper_winsor), num_bank_accounts, NA)) %>%   
-  mutate(num_bank_accounts = ifelse(num_bank_accounts <= lower_winsor, lower_winsor, num_bank_accounts))
-summary(dfT$num_bank_accounts)
-# Fill some data, suspected to be input error
-df <- df %>% 
-  group_by(customer_id) %>% 
-  fill(num_bank_accounts, .direction = "updown")
-
-boxplot(df$num_bank_accounts)
-summary(df$num_bank_accounts)
-View(df)
-
-
-### num_credit_card ###
-summary(df$num_credit_card)
-boxplot(df$num_credit_card)
-
-# The bound before the outlier begin
-upper_winsor <- quantile(df$num_credit_card, 0.97)
-
-# Turn outlier into NAs
-df <- df %>%
-  group_by(customer_id) %>% 
-  mutate(num_credit_card = ifelse(between(num_credit_card, min(num_credit_card), upper_winsor), num_credit_card, NA))
-summary(df$num_credit_card)
-# Fill some data, suspected to be input error
-df <- df %>% 
-  group_by(customer_id) %>% 
-  fill(num_credit_card, .direction = "updown")
-
-boxplot(df$num_credit_card)
-summary(df$num_credit_card)
-View(df)
-
-### interest_rate ###
-summary(df$interest_rate)
-boxplot(df$interest_rate)
-# The bound before the outlier begin
-upper_winsor <- quantile(dfT$interest_rate, 0.95)
-
-
-# Turn outlier into NAs
-df <- df %>%
-  group_by(customer_id) %>% 
-  mutate(interest_rate = ifelse(interest_rate >= upper_winsor, NA, interest_rate))
-
-# Fill some data, suspected to be input error
-df <- df %>% 
-  group_by(customer_id) %>% 
-  fill(interest_rate, .direction = "updown")
-
-summary(df$interest_rate)
-
-# Remove the outlier
-df <- df %>% 
-  group_by(customer_id) %>% 
-  mutate(interest_rate = ifelse(is.na(interest_rate), upper_winsor, interest_rate))
-
-boxplot(df$interest_rate)
-summary(df$interest_rate)
-View(df)
-
-### num_of_loan ###
-
-summary(df$num_of_loan)
-boxplot(df$num_of_loan)
-View(df)
-
-# The bound before the outlier begin
-upper_winsor <- quantile(df$num_of_loan, 0.95)
-lower_winsor <- quantile(df$num_of_loan, 0.05)
-
-
-# Turn outlier into NAs
-df <- df %>%
-  group_by(customer_id) %>% 
-  mutate(num_of_loan = ifelse(between(num_of_loan, lower_winsor, upper_winsor), num_of_loan, NA))
-
-# Fill some data, suspected to be input error
-df <- df %>% 
-  group_by(customer_id) %>% 
-  fill(num_of_loan, .direction = "updown")
-
-summary(df$num_of_loan)
-
-# Remove the outlier
-df <- df %>% 
-  group_by(customer_id) %>% 
-  mutate(num_of_loan = ifelse(is.na(num_of_loan), upper_winsor, interest_rate))
-
-boxplot(df$num_of_loan)
-summary(df$num_of_loan)
-View(df)
-
-### delay_from_due_date ###
-dfT = df
-summary(dfT$delay_from_due_date)
-boxplot(dfT$delay_from_due_date)
-View(dfT)
-
-# The bound before the outlier begin
-upper_winsor <- quantile(dfT$delay_from_due_date, 0.95)
-
-
-# Turn outlier into NAs
-dfT <- dfT %>%
-  group_by(customer_id) %>% 
-  mutate(delay_from_due_date = ifelse(delay_from_due_date < 0, NA, delay_from_due_date)) 
-
-# Fill some data, suspected to be input error
-dfT <- dfT %>% 
-  group_by(customer_id) %>% 
-  fill(delay_from_due_date, .direction = "updown")
-
-summary(dfT$delay_from_due_date)
-
-# Remove the outlier
-dfT <- dfT %>% 
-  group_by(customer_id) %>% 
-  mutate(delay_from_due_date = ifelse(delay_from_due_date >= upper_winsor, NA, delay_from_due_date)) %>% 
-  mutate(delay_from_due_date = ifelse(is.na(delay_from_due_date), upper_winsor, delay_from_due_date))
-
-boxplot(dfT$delay_from_due_date)
-summary(dfT$delay_from_due_date)
-View(dfT)
-
-
-### delay_from_due_date ###
-dfT = df
-summary(dfT$num_of_delayed_payment)
-boxplot(dfT$num_of_delayed_payment)
-View(dfT)
-
-# The bound before the outlier begin
-upper_winsor <- quantile(dfT$num_of_delayed_payment, 0.989)
-
-# Turn outlier into NAs
-dfT <- dfT %>%
-  group_by(customer_id) %>% 
-  mutate(num_of_delayed_payment = ifelse(num_of_delayed_payment < 0, 0, num_of_delayed_payment)) 
-
-summary(dfT$num_of_delayed_payment)
-
-# Remove the outlier
-dfT <- dfT %>% 
-  group_by(customer_id) %>% 
-  mutate(num_of_delayed_payment = ifelse(num_of_delayed_payment >= upper_winsor, NA, num_of_delayed_payment)) %>% 
-  mutate(num_of_delayed_payment = ifelse(is.na(num_of_delayed_payment), upper_winsor, num_of_delayed_payment))
-
-boxplot(dfT$num_of_delayed_payment)
-summary(dfT$num_of_delayed_payment)
-View(dfT)
-
 ### changed_credit_limit ###
-dfT = df
-summary(dfT$changed_credit_limit)
-boxplot(dfT$changed_credit_limit)
-View(dfT)
+summary(df$changed_credit_limit)
+boxplot(df$changed_credit_limit)
 
 # The bound before the outlier begin
-upper_winsor <- quantile(dfT$changed_credit_limit, 0.95)
+upper_winsor <- quantile(df$changed_credit_limit, 0.95)
 
-# Turn outlier into NAs
-dfT <- dfT %>%
+# Turn input error into NAs
+df <- df %>%
   group_by(customer_id) %>% 
   mutate(changed_credit_limit = ifelse(changed_credit_limit < 0, NA, changed_credit_limit)) 
 
 # Fill some data, suspected to be input error
-dfT <- dfT %>% 
+df <- df %>% 
   group_by(customer_id) %>% 
   fill(changed_credit_limit, .direction = "updown")
 
-summary(dfT$changed_credit_limit)
+summary(df$changed_credit_limit)
 
 # Remove the outlier
-dfT <- dfT %>% 
+df <- df %>% 
   group_by(customer_id) %>% 
   mutate(changed_credit_limit = ifelse(changed_credit_limit >= upper_winsor, NA, changed_credit_limit)) %>% 
-  mutate(changed_credit_limit = ifelse(is.na(changed_credit_limit), upper_winsor, changed_credit_limit))
+  mutate(changed_credit_limit = ifelse(is.na(changed_credit_limit), mean(changed_credit_limit), changed_credit_limit)) %>% 
+  mutate(changed_credit_limit = ifelse(is.na(changed_credit_limit), upper_winsor, changed_credit_limit)) 
 
-boxplot(dfT$changed_credit_limit)
-summary(dfT$changed_credit_limit)
-View(dfT)
-
-### num_credit_inquiries ###
-dfT = df
-summary(dfT$num_credit_inquiries)
-boxplot(dfT$num_credit_inquiries)
-View(dfT)
-
-# The bound before the outlier begin
-upper_winsor <- quantile(dfT$num_credit_inquiries, 0.98)
-
-# Turn outlier into NAs
-dfT <- dfT %>%
-  group_by(customer_id) %>% 
-  mutate(num_credit_inquiries = ifelse(num_credit_inquiries >= upper_winsor, NA, num_credit_inquiries)) 
-
-# Fill some data, suspected to be input error
-dfT <- dfT %>% 
-  group_by(customer_id) %>% 
-  fill(num_credit_inquiries, .direction = "updown")
-
-summary(dfT$num_credit_inquiries)
-
-boxplot(dfT$num_credit_inquiries)
-summary(dfT$num_credit_inquiries)
-View(dfT)
-
-### outstanding_debt ###
-dfT = df
-summary(dfT$outstanding_debt)
-boxplot(dfT$outstanding_debt)
-View(dfT)
-
-# The bound before the outlier begin
-upper_winsor <- quantile(dfT$outstanding_debt, 0.935)
-
-# Turn outlier into NAs
-dfT <- dfT %>%
-  group_by(customer_id) %>% 
-  mutate(outstanding_debt = ifelse(outstanding_debt >= upper_winsor, NA, outstanding_debt)) 
-
-# Fill some data, suspected to be input error
-dfT <- dfT %>% 
-  group_by(customer_id) %>% 
-  fill(outstanding_debt, .direction = "updown")
-
-summary(dfT$outstanding_debt)
-
-# Remove the outlier
-dfT <- dfT %>% 
-  group_by(customer_id) %>%  
-  mutate(outstanding_debt = ifelse(is.na(outstanding_debt), upper_winsor, outstanding_debt))
-
-boxplot(dfT$outstanding_debt)
-summary(dfT$outstanding_debt)
-View(dfT)
-
-
-
-### credit utilization ratio ###
-dfT = df
-summary(dfT$credit_utilization_ratio)
-boxplot(dfT$credit_utilization_ratio)
-View(dfT)
-
-
-# The bound before the outlier begin
-upper_winsor <- quantile(dfT$credit_utilization_ratio, 0.95)
-
-# Turn outlier into NAs
-dfT <- dfT %>%
-  group_by(customer_id) %>% 
-  mutate(credit_utilization_ratio = ifelse(credit_utilization_ratio >= upper_winsor, upper_winsor, credit_utilization_ratio)) 
-
-# Fill some data, suspected to be input error
-dfT <- dfT %>% 
-  group_by(customer_id) %>% 
-  fill(outstanding_debt, .direction = "updown")
-
-summary(dfT$outstanding_debt)
-
-# Remove the outlier
-dfT <- dfT %>% 
-  group_by(customer_id) %>%  
-  mutate(outstanding_debt = ifelse(is.na(outstanding_debt), upper_winsor, outstanding_debt))
-
-boxplot(dfT$credit_utilization_ratio)
-summary(dfT$credit_utilization_ratio)
-View(dfT)
-
-
-### credit utilization ratio ###
-dfT = df
-summary(dfT$total_emi_per_month)
-boxplot(df$total_emi_per_month)
-View(dfT)
-
-
-# The bound before the outlier begin
-upper_winsor <- quantile(dfT$total_emi_per_month, 0.95)
-
-# Turn outlier into NAs
-dfT <- dfT %>%
-  group_by(customer_id) %>% 
-  mutate(total_emi_per_month = ifelse(total_emi_per_month >= upper_winsor, NA, total_emi_per_month)) 
-
-summary(dfT$total_emi_per_month)
-# Fill some data, suspected to be input error
-dfT <- dfT %>% 
-  group_by(customer_id) %>% 
-  fill(total_emi_per_month, .direction = "updown")
-
-summary(dfT$total_emi_per_month)
-
-# Remove the outlier
-dfT <- dfT %>% 
-  group_by(customer_id) %>%  
-  mutate(total_emi_per_month = ifelse(is.na(total_emi_per_month), upper_winsor, total_emi_per_month))
-
-boxplot(dfT$total_emi_per_month)
-summary(dfT$total_emi_per_month)
-View(dfT)
-
-### amount_invested_monthly ###
-dfT = df
-summary(dfT$amount_invested_monthly)
-boxplot(df$amount_invested_monthly)
-View(dfT)
-
-
-# The bound before the outlier begin
-upper_winsor <- quantile(dfT$amount_invested_monthly, 0.89)
-
-# Turn outlier into NAs
-dfT <- dfT %>%
-  group_by(customer_id) %>% 
-  mutate(amount_invested_monthly = ifelse(amount_invested_monthly >= upper_winsor, upper_winsor, amount_invested_monthly)) 
-
-summary(dfT$amount_invested_monthly)
-# Fill some data, suspected to be input error
-dfT <- dfT %>% 
-  group_by(customer_id) %>% 
-  fill(amount_invested_monthly, .direction = "updown")
-
-summary(dfT$amount_invested_monthly)
-
-# Remove the outlier
-dfT <- dfT %>% 
-  group_by(customer_id) %>%  
-  mutate(total_emi_per_month = ifelse(is.na(total_emi_per_month), upper_winsor, total_emi_per_month))
-
-boxplot(dfT$amount_invested_monthly)
-summary(dfT$total_emi_per_month)
-View(dfT)
-
-
-
-
-
+boxplot(df$changed_credit_limit)
+summary(df$changed_credit_limit)
 
 ### monthly_balance ###
-dfT = df
-summary(dfT$monthly_balance)
+summary(df$monthly_balance)
 boxplot(df$monthly_balance)
-View(dfT)
+
+# The bound before the outlier begin
+upper_winsor <- quantile(df$monthly_balance, 0.925)
+
+# Remove the outlier
+df <- df %>% 
+  group_by(customer_id) %>% 
+  mutate(monthly_balance = ifelse(monthly_balance >= upper_winsor, NA, monthly_balance)) %>% 
+  mutate(monthly_balance = ifelse(is.na(monthly_balance), mean(monthly_balance, na.rm = TRUE), monthly_balance)) %>%
+  mutate(monthly_balance = ifelse(is.na(monthly_balance), upper_winsor, monthly_balance))
+
+summary(df$monthly_balance)
+
+boxplot(df$monthly_balance)
+summary(df$monthly_balance)
+
+### amount_invested_monthly ###
+summary(df$amount_invested_monthly)
+boxplot(df$amount_invested_monthly)
+
+# The bound before the outlier begin
+upper_winsor <- quantile(df$amount_invested_monthly, 0.89)
+
+# Remove the outlier
+df <- df %>% 
+  group_by(customer_id) %>% 
+  mutate(amount_invested_monthly = ifelse(amount_invested_monthly >= upper_winsor, NA, amount_invested_monthly)) %>% 
+  mutate(amount_invested_monthly = ifelse(is.na(amount_invested_monthly), mean(amount_invested_monthly, na.rm = TRUE), amount_invested_monthly)) %>%
+  mutate(amount_invested_monthly = ifelse(is.na(amount_invested_monthly), upper_winsor, amount_invested_monthly))
+
+boxplot(df$amount_invested_monthly)
+summary(df$amount_invested_monthly)
+
+### credit utilization ratio ###
+summary(df$credit_utilization_ratio)
+boxplot(df$credit_utilization_ratio)
+View(df)
 
 
 # The bound before the outlier begin
-upper_winsor <- quantile(dfT$monthly_balance, 0.925)
+upper_winsor <- quantile(df$credit_utilization_ratio, 0.95)
 
 # Turn outlier into NAs
-dfT <- dfT %>%
-  group_by(customer_id) %>% 
-  mutate(monthly_balance = ifelse(monthly_balance >= upper_winsor, upper_winsor, monthly_balance)) 
+df <- df %>%
+  group_by(customer_id) %>% mutate(credit_utilization_ratio = ifelse(credit_utilization_ratio >= upper_winsor, NA, credit_utilization_ratio)) %>% 
+  mutate(credit_utilization_ratio = ifelse(is.na(credit_utilization_ratio), mean(credit_utilization_ratio, na.rm = TRUE), credit_utilization_ratio)) %>%
+  mutate(credit_utilization_ratio = ifelse(credit_utilization_ratio >= upper_winsor, upper_winsor, credit_utilization_ratio)) 
 
-summary(dfT$amount_invested_monthly)
-# Fill some data, suspected to be input error
-dfT <- dfT %>% 
-  group_by(customer_id) %>% 
-  fill(amount_invested_monthly, .direction = "updown")
+boxplot(df$credit_utilization_ratio)
+summary(df$credit_utilization_ratio)
 
-summary(dfT$amount_invested_monthly)
+### annual_income ###
+summary(df$annual_income)
+boxplot(df$annual_income)
+# The bound before the outlier begin
+upper_winsor <- quantile(df$annual_income, 0.95)
+
+# Turn outlier into NAs
+
+df <- df %>%
+  group_by(customer_id) %>% 
+  mutate(annual_income = ifelse(annual_income >= upper_winsor, NA, annual_income)) %>% 
+  mutate(annual_income = ifelse(is.na(annual_income), mean(annual_income, na.rm = TRUE), annual_income)) %>% 
+  mutate(annual_income = ifelse(annual_income >= upper_winsor, upper_winsor, annual_income)) 
+
+# Dealing with edge cases where everything is NA in a group
+df <- df %>% 
+  ungroup() %>% 
+  mutate(annual_income = ifelse(is.na(annual_income), mean(annual_income, na.rm = TRUE), annual_income)) %>% 
+  group_by(customer_id)
+
+summary(df$annual_income)
+boxplot(df$annual_income)
+
+### delay_from_due_date ###
+summary(df$delay_from_due_date)
+boxplot(df$delay_from_due_date)
+View(df)
+
+# The bound before the outlier begin
+upper_winsor <- quantile(df$delay_from_due_date, 0.95)
+
+summary(df$delay_from_due_date)
 
 # Remove the outlier
-dfT <- dfT %>% 
-  group_by(customer_id) %>%  
-  mutate(total_emi_per_month = ifelse(is.na(total_emi_per_month), upper_winsor, total_emi_per_month))
+df <- df %>% 
+  group_by(customer_id) %>% 
+  mutate(delay_from_due_date = ifelse(between(delay_from_due_date, 0, upper_winsor), delay_from_due_date, NA)) %>% 
+  mutate(delay_from_due_date = ifelse(is.na(delay_from_due_date), mean(delay_from_due_date, na.rm = TRUE), delay_from_due_date)) %>% 
+  mutate(delay_from_due_date = ifelse(is.na(delay_from_due_date), upper_winsor, delay_from_due_date)) 
 
-boxplot(dfT$monthly_balance)
-summary(dfT$total_emi_per_month)
-View(dfT)
+
+boxplot(df$delay_from_due_date)
+summary(df$delay_from_due_date)
+View(df)
+
+### num_of_delayed_payment ###
+df
+summary(df$num_of_delayed_payment)
+boxplot(df$num_of_delayed_payment)
+View(df)
+
+# The bound before the outlier begin
+upper_winsor <- quantile(df$num_of_delayed_payment, 0.989)
+
+# Remove the outlier
+df <- df %>% 
+  group_by(customer_id) %>% 
+  mutate(num_of_delayed_payment = ifelse(between(num_of_delayed_payment, 0, upper_winsor), num_of_delayed_payment, NA)) %>% 
+  mutate(num_of_delayed_payment = ifelse(is.na(num_of_delayed_payment), mean(num_of_delayed_payment, na.rm = TRUE), num_of_delayed_payment)) %>% 
+  mutate(num_of_delayed_payment = ifelse(is.na(num_of_delayed_payment), upper_winsor, num_of_delayed_payment)) 
+
+### num_credit_inquiries ###
+df
+summary(df$num_credit_inquiries)
+boxplot(df$num_credit_inquiries)
+View(df)
+
+# The bound before the outlier begin
+upper_winsor <- quantile(df$num_credit_inquiries, 0.98)
+
+# Turn outlier into NAs
+df <- df %>%
+  group_by(customer_id) %>% 
+  mutate(num_credit_inquiries = ifelse(num_credit_inquiries >= upper_winsor, NA, num_credit_inquiries)) %>% 
+  mutate(num_credit_inquiries = ifelse(is.na(num_credit_inquiries), mean(num_credit_inquiries, na.rm = TRUE), num_credit_inquiries)) %>%
+  mutate(num_credit_inquiries = ifelse(num_credit_inquiries >= upper_winsor, upper_winsor, num_credit_inquiries)) 
+
+boxplot(df$num_credit_inquiries)
+summary(df$num_credit_inquiries)
+
+glimpse(df)
+summary(df)
